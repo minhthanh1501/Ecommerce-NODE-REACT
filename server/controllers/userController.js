@@ -5,6 +5,9 @@ const {
   generateRefreshToken,
 } = require("../middlewares/jwt");
 const jwt = require("jsonwebtoken");
+const sendMail = require('../utils/sendMail')
+const crypto = require('crypto');
+const { now } = require("mongoose");
 
 const register = asyncHandler(async (req, res) => {
   const { email, password, firstname, lastname } = req.body;
@@ -125,4 +128,48 @@ const logout = asyncHandler(async (req , res) => {
   })
 })
 
-module.exports = { register, login, getCurrentUser, refreshAccessToken , logout};
+const forgotPassword = asyncHandler( async (req, res) => {
+  const { email } = req.query
+  if(!email) throw new Error('Missing Email!')
+
+  const user = await User.findOne({email})
+  if (!user) throw new Error('User Not Found!')
+
+  const resetToken = user.createPasswordChangedToken()
+  // save để cập nhật lưu trong db
+  await user.save()
+
+  const html = `Please Click Link bottom to change your password. Link will expired then 15 minutes since now! <a href = ${process.env.URL_CLIENT}/api/user/reset-password/${resetToken} >Click here!</a>`
+
+  const data = {
+    email,
+    html
+  }
+
+  const rs = await sendMail(data)
+  return res.status(200).json({
+    success: rs ? true : false,
+    mes: 'Check Your Email!',
+    rs
+  })
+
+})
+
+const resetPassword = asyncHandler(async(req, res) => {
+  const { token ,password } = req.body
+  if (!token || !password) throw new Error('Missing input')
+  const passwordResetToken = crypto.createHash('sha256').update(token).digest()
+  const user = await User.findOne({passwordResetToken, passwordResetExpired: {$gt: Date.now()}}) 
+  if (!user) throw new Error('Invalid reset Token')
+  user.password = password
+  user.passwordResetToken = undefined
+  user.passwordChangedAt = Date.now()
+  user.passwordResetExpired = undefined
+  await user.save()
+  return res.status(200).json({
+    success: user ? true : false,
+    mes: user ? 'Updated password' : 'something went Wrong'
+  })
+})
+
+module.exports = { register, login, getCurrentUser, refreshAccessToken , logout, forgotPassword, resetPassword};
