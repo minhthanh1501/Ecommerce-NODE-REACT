@@ -5,8 +5,8 @@ const {
   generateRefreshToken,
 } = require("../middlewares/jwt");
 const jwt = require("jsonwebtoken");
-const sendMail = require('../utils/sendMail')
-const crypto = require('crypto');
+const sendMail = require("../utils/sendMail");
+const crypto = require("crypto");
 const { now } = require("mongoose");
 
 const register = asyncHandler(async (req, res) => {
@@ -52,16 +52,16 @@ const login = asyncHandler(async (req, res) => {
   // console.log(user.isCorrectPassword(password))
   if (user && (await user.isCorrectPassword(password))) {
     // tach password va role ra khoi return dataUser
-    const { password, role, ...userData } = user.toObject();
+    const { password, role,refreshToken, ...userData } = user.toObject();
 
     // create accessToken
     const accessToken = generateAccessToken(user._id, role);
     // create refreshToken
-    const refreshToken = generateRefreshToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
     // statement save refreshToken to Database
-    await User.findByIdAndUpdate(user._id, { refreshToken }, { new: true });
+    await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken }, { new: true });
     // statement save refreshToken to Cookie
-    res.cookie("refreshToken", refreshToken, {
+    res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -83,7 +83,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   const user = await User.findById(_id).select("-refreshToken -password -role");
 
   return res.status(200).json({
-    success: false,
+    success: user ? true : false,
     rs: user ? user : "User not found",
   });
 });
@@ -95,7 +95,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   if (!cookie && !cookie.refreshToken) {
     throw new Error("No refresh token in cookies");
   }
-  
+
   // check token co hop le khong
   const rs = await jwt.verify(cookie.refreshToken, process.env.JWT_SECRET);
   const response = await User.findOne({
@@ -110,66 +110,129 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   });
 });
 
-const logout = asyncHandler(async (req , res) => {
-  const cookie = req.cookies
+const logout = asyncHandler(async (req, res) => {
+  const cookie = req.cookies;
 
-  if (!cookie || !cookie.refreshToken) throw new Error('No refresh Token in cookie')
+  if (!cookie || !cookie.refreshToken)
+    throw new Error("No refresh Token in cookie");
   // xoa column refreshToken trong db
-  await User.findOneAndUpdate({refreshToken: cookie.refreshToken}, {refreshToken: ''}, {new : true})
+  await User.findOneAndUpdate(
+    { refreshToken: cookie.refreshToken },
+    { refreshToken: "" },
+    { new: true }
+  );
   // xoa refreshToken o cookie trinh duyet
-  res.clearCookie('refreshToken',{
+  res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: true
-  })
+    secure: true,
+  });
 
   return res.status(200).json({
     success: true,
-    mes: 'Logout Success!'
-  })
-})
+    mes: "Logout Success!",
+  });
+});
 
-const forgotPassword = asyncHandler( async (req, res) => {
-  const { email } = req.query
-  if(!email) throw new Error('Missing Email!')
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.query;
+  if (!email) throw new Error("Missing Email!");
 
-  const user = await User.findOne({email})
-  if (!user) throw new Error('User Not Found!')
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("User Not Found!");
 
-  const resetToken = user.createPasswordChangedToken()
+  const resetToken = user.createPasswordChangedToken();
   // save để cập nhật lưu trong db
-  await user.save()
+  await user.save();
 
-  const html = `Please Click Link bottom to change your password. Link will expired then 15 minutes since now! <a href = ${process.env.URL_CLIENT}/api/user/reset-password/${resetToken} >Click here!</a>`
+  const html = `Please Click Link bottom to change your password. Link will expired then 15 minutes since now! <a href = ${process.env.URL_CLIENT}/api/user/reset-password/${resetToken} >Click here!</a>`;
 
   const data = {
     email,
-    html
-  }
+    html,
+  };
 
-  const rs = await sendMail(data)
+  const rs = await sendMail(data);
   return res.status(200).json({
     success: rs ? true : false,
-    mes: 'Check Your Email!',
-    rs
-  })
+    mes: "Check Your Email!",
+    rs,
+  });
+});
 
-})
-
-const resetPassword = asyncHandler(async(req, res) => {
-  const { token ,password } = req.body
-  if (!token || !password) throw new Error('Missing input')
-  const passwordResetToken = crypto.createHash('sha256').update(token).digest()
-  const user = await User.findOne({passwordResetToken, passwordResetExpired: {$gt: Date.now()}}) 
-  if (!user) throw new Error('Invalid reset Token')
-  user.password = password
-  user.passwordResetToken = undefined
-  user.passwordChangedAt = Date.now()
-  user.passwordResetExpired = undefined
-  await user.save()
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) throw new Error("Missing input");
+  const passwordResetToken = crypto.createHash("sha256").update(token).digest();
+  const user = await User.findOne({
+    passwordResetToken,
+    passwordResetExpired: { $gt: Date.now() },
+  });
+  if (!user) throw new Error("Invalid reset Token");
+  user.password = password;
+  user.passwordResetToken = undefined;
+  user.passwordChangedAt = Date.now();
+  user.passwordResetExpired = undefined;
+  await user.save();
   return res.status(200).json({
     success: user ? true : false,
-    mes: user ? 'Updated password' : 'something went Wrong'
+    mes: user ? "Updated password" : "something went Wrong",
+  });
+});
+
+// Admin Permission
+const getAllUsers = asyncHandler(async (req, res) => {
+  const response = await User.find().select('-refreshToken -password -role')
+
+  return res.status(200).json({
+    success: response ? true : false,
+    users: response
   })
 })
 
-module.exports = { register, login, getCurrentUser, refreshAccessToken , logout, forgotPassword, resetPassword};
+const deleteUser = asyncHandler(async (req, res) => {
+  const { _id } = req.query
+  if(!_id) throw new Error('Missing inputs')
+  const response = await User.findByIdAndDelete(_id)
+
+  return res.status(200).json({
+    success: response ? true : false,
+    deletedUser: response ? `User with email ${response.email} is deleted` : 'User Not Found'
+  })
+})
+
+const updateUser = asyncHandler(async (req, res) => {
+  const { _id } = req.user
+  
+  if(!_id || Object.keys(req.body).length === 0) throw new Error('Missing inputs')
+  const response = await User.findByIdAndUpdate(_id,req.body,{new : true}).select('-password -role')
+
+  return res.status(200).json({
+    success: response ? true : false,
+    updatedUser: response ? response : 'User Not Found'
+  })
+})
+
+const updatedUserByAdmin = asyncHandler(async (req, res) => {
+  const { uid } = req.params
+  if(!uid || Object.keys(req.body).length === 0) throw new Error('Missing inputs')
+  const response = await User.findByIdAndUpdate(uid,req.body,{new : true}).select('-password -role -refreshToken')
+
+  return res.status(200).json({
+    success: response ? true : false,
+    updatedUser: response ? response : 'User Not Found'
+  })
+})
+
+module.exports = {
+  register,
+  login,
+  getCurrentUser,
+  refreshAccessToken,
+  logout,
+  forgotPassword,
+  resetPassword,
+  getAllUsers,
+  deleteUser,
+  updateUser,
+  updatedUserByAdmin,
+};
