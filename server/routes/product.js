@@ -1,14 +1,16 @@
 const router = require("express").Router();
-const ctrl = require("../controllers/productController");
+const ctrls = require("../controllers/productController");
 const { verifyAccessToken, isAdmin } = require("../middlewares/verifyToken");
 
-router.post("/", [verifyAccessToken, isAdmin] ,ctrl.createProduct);
-router.get("/" ,ctrl.getAllProducts);
+router.post("/", [verifyAccessToken, isAdmin] ,ctrls.createProduct);
+router.get("/" ,ctrls.getAllProducts);
+router.put('/ratings',verifyAccessToken,ctrls.ratings)
+// router.get('/test',ctrls.test)
 
 
-router.get("/:pid" ,ctrl.getProduct);
-router.put("/:pid" ,[verifyAccessToken, isAdmin],ctrl.updateProduct);
-router.delete("/:pid" ,[verifyAccessToken, isAdmin],ctrl.deleteProduct);
+router.get("/:pid" ,ctrls.getProduct);
+router.put("/:pid" ,[verifyAccessToken, isAdmin],ctrls.updateProduct);
+router.delete("/:pid" ,[verifyAccessToken, isAdmin],ctrls.deleteProduct);
 
 
 
