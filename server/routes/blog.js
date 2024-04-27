@@ -10,7 +10,7 @@ const {
 	uploadImageBlog,
 } = require('../controllers/blogController')
 const { verifyAccessToken, isAdmin } = require('../middlewares/verifyToken')
-// const uploader = require('../config/cloudinary.config')
+const uploader = require('../config/cloudinary.config')
 
 router.get('/', getAllBlogs)
 router.post('/', [verifyAccessToken, isAdmin], createNewBlog)
@@ -18,8 +18,8 @@ router.get('/one/:bid', getBlog)
 router.put(
 	'/image/:bid',
 	[verifyAccessToken, isAdmin],
-	// uploader.single('image'),
-	// uploadImageBlog,
+	uploader.single('image'),
+	uploadImageBlog,
 )
 router.put('/like/:bid', verifyAccessToken, likeBlog)
 router.put('/dislike/:bid', verifyAccessToken, dislikeBlog)

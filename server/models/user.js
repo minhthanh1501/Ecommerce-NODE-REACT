@@ -1,6 +1,6 @@
 const mongoose = require("mongoose"); // Erase if already required
-const bcrypt = require('bcrypt')
-const crypto = require('crypto')
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema(
   {
@@ -30,11 +30,20 @@ var userSchema = new mongoose.Schema(
       type: String,
       default: "user",
     },
-    cart: {
+    cart: [
+      {
+        product: {
+          type: mongoose.Types.ObjectId,
+          ref: 'Product',
+        },
+        quantity: Number,
+        color: String,
+      },
+    ],
+    address: {
       type: Array,
       default: [],
     },
-    address: [{ type: mongoose.Types.ObjectId, ref: "Address" }],
     wishList: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
     isBlocked: {
       type: Boolean,
@@ -61,27 +70,30 @@ var userSchema = new mongoose.Schema(
 );
 
 // hanlde before
-userSchema.pre('save', async function(next){
-  if (!this.isModified('password')) {
-    next()
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
   }
 
-  const salt = bcrypt.genSaltSync(10)
-  this.password = await bcrypt.hash(this.password,salt)
-  next()
-})
+  const salt = bcrypt.genSaltSync(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
 userSchema.methods = {
   isCorrectPassword: async function (password) {
-    return await bcrypt.compare(password, this.password)
+    return await bcrypt.compare(password, this.password);
   },
   createPasswordChangedToken: function () {
-    const resetToken = crypto.randomBytes(32).toString('hex')
-    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest()
-    this.passwordResetExpired = Date.now() + 15 * 60 * 1000
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    this.passwordResetToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest();
+    this.passwordResetExpired = Date.now() + 15 * 60 * 1000;
 
-    return resetToken
-  }
-}
+    return resetToken;
+  },
+};
 //Export the model
 module.exports = mongoose.model("User", userSchema);

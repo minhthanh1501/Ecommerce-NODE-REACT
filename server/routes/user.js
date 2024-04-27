@@ -9,11 +9,14 @@ router.post("/refreshtoken", ctrls.refreshAccessToken);
 router.post("/logout", ctrls.logout);
 router.get("/forgotpassword", ctrls.forgotPassword);
 router.put("/resetpassword", ctrls.resetPassword);
-router.put("/",[verifyAccessToken], ctrls.updateUser);
+router.put("/current",[verifyAccessToken], ctrls.updateUser);
+router.put("/cart",[verifyAccessToken], ctrls.updateCart);
 
 // Admin permission
 router.get("/", [verifyAccessToken, isAdmin], ctrls.getAllUsers);
+router.put("/address/",[verifyAccessToken, isAdmin], ctrls.updatedUserAddress);
 router.delete("/", [verifyAccessToken, isAdmin], ctrls.deleteUser);
 router.put("/:uid",[verifyAccessToken, isAdmin], ctrls.updatedUserByAdmin);
+
 
 module.exports = router;
