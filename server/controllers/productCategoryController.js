@@ -15,7 +15,7 @@ const getCategory = asyncHandler(async (req, res) => {
 
   return res.json({
     success: response ? true : false,
-    createCategory: response ? response : "Cannot create product-category",
+    productCategory: response ? response : "Cannot create product-category",
   });
 });
 
