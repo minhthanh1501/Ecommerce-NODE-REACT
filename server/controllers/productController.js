@@ -155,19 +155,6 @@ const uploadImagesProduct = asyncHandler(async (req,res) => {
   })
 })
 
-// const test = asyncHandler(async (req, res) => {
-//   const result = await Product.findById(req.query.pid).select("ratings totalRatings")
-  
-// //   result.ratings.map((item,index) =>{
-// //     console.log(item.star)
-// //   })
-    
- 
-//   return res.status(200).json({
-//     success: result ? true: false,
-//     result : result.ratings[0].star
-//   })
-// })
 
 module.exports = {
   createProduct,
