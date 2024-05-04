@@ -4,9 +4,9 @@ const Banner = () => {
   return (
     <div className="w-full">
       <img
-        src="https://digital-world-2.myshopify.com/cdn/shop/files/slideshow5-img-home2_600x.png?v=1613166683"
+        src="https://rubicmarketing.com/wp-content/uploads/2021/07/banner-quang-cao-facebook-3.jpg"
         alt="banner"
-        className="w-full object-contain"
+        className="h-[392px] w-full object-cover"
       />
     </div>
   );

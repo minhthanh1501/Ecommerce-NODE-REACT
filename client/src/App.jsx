@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Login, Home, Public } from "./pages/public";
 import path from "./utils/path";
+import { getCategories } from "@/store/asyncActions";
+import { useDispatch } from "react-redux";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getCategories());
+  }, []);
 
   return (
     <div className="min-h-screen font-main">
