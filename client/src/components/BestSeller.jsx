@@ -25,14 +25,21 @@ const BestSeller = () => {
   const [bestSellers, setBestSellers] = useState(null);
   const [newProducts, setNewProducts] = useState(null);
   const [activedTab, setActivedTab] = useState(1);
+  const [products, setProducts] = useState(null);
 
   const fetchProducts = async () => {
     const response = await Promise.all([
       apiGetProducts({ sort: "-sold" }),
       apiGetProducts({ sort: "-createdAt" }),
     ]);
-    if (response[0].success) setBestSellers(response[0].products);
-    if (response[1].success) setNewProducts(response[1].products);
+    if (response[0].success) {
+      setBestSellers(response[0].products);
+      setProducts(response[0].products);
+    }
+    if (response[1].success) {
+      setNewProducts(response[1].products);
+      setProducts(response[1].products);
+    }
 
     // console.log();
   };
@@ -40,10 +47,14 @@ const BestSeller = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+  useEffect(() => {
+    if (activedTab === 1) setProducts(bestSellers);
+    if (activedTab === 2) setProducts(newProducts);
+  }, [activedTab]);
 
   return (
     <div>
-      <div className="flex text-[20px] gap-8 pb-4 border-main border-b-2">
+      <div className="flex text-[20px] pb-4 -ml-[32px]">
         {tabs.map((el) => (
           <span
             key={el.id}
@@ -52,8 +63,8 @@ const BestSeller = () => {
             // }`}
             className={twMerge(
               clsx(
-                "font-semibold uppercase border-r text-gray-600",
-                activedTab === el.id ? "text-black cursor-pointer" : ""
+                "font-semibold uppercase px-8 border-r text-gray-600  cursor-pointer",
+                activedTab === el.id ? "text-black" : ""
               )
             )}
             onClick={() => setActivedTab(el.id)}
@@ -62,10 +73,14 @@ const BestSeller = () => {
           </span>
         ))}
       </div>
-      <div className="mt-4">
+      <div className="mt-2 mx-[-10px]  border-main border-t-2 pt-4">
         <Slider {...settings}>
           {bestSellers?.map((el) => (
-            <Product key={el._id} productData={el} />
+            <Product
+              key={el._id}
+              productData={el}
+              isNew={activedTab === 1 ? false : true}
+            />
           ))}
         </Slider>
       </div>
