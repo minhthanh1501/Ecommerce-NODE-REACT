@@ -7,3 +7,4 @@ export const getCategories = createAsyncThunk('app/categories',async(data, {reje
 
   return response.productCategory
 })
+

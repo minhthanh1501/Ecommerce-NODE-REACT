@@ -18,7 +18,7 @@ const createProduct = asyncHandler(async (req, res) => {
 // Filtering, sorting & pagination
 const getAllProducts = asyncHandler(async (req, res) => {
   const queries = { ...req.query };
-  console.log(queries);
+  // console.log(queries);
   // Tach cac field dac biet ra khoi query
   const excludeFields = ["limit", "sort", "page", "fields"];
   excludeFields.forEach((el) => delete queries[el]);
@@ -30,7 +30,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
     (matchedEl) => `$${matchedEl}`
   );
   const formatedQueries = JSON.parse(queryString);
-  console.log(formatedQueries);
+  // console.log(formatedQueries);
 
   // Filtering
   if (queries?.title)
