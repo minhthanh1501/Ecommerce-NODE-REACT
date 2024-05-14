@@ -11,7 +11,7 @@ function App() {
   useEffect(() => {
     dispatch(getCategories());
     dispatch(getProducts());
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen font-main">

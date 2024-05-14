@@ -20,8 +20,8 @@ const fn = async (product) => {
 			product?.variants?.find(el => el.label === 'Color')?.variants[0] ||
 			'BLACK',
 		thumb: product?.thumb,
-		// totalRating: Math.round(Math.random() * 5),
-		totalRating: 0,
+		// totalRatings: Math.round(Math.random() * 5),
+		totalRatings: 0,
 	})
 }
 

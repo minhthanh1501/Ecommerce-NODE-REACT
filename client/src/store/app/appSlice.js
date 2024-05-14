@@ -8,7 +8,9 @@ export const appSlice = createSlice({
     isLoading: false
   },
   reducers: {
- 
+    logout: (state) => {
+      state.isLoading = false;
+    }
   },
   // Code logic xử lý async action
   extraReducers: (builder) => {
