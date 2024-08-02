@@ -73,7 +73,7 @@ const BestSeller = () => {
           </span>
         ))}
       </div>
-      <div className="mt-2 mx-[-10px]  border-main border-t-2 pt-4">
+      <div className="mt-2 border-main border-t-2 pt-4">
         <Slider {...settings}>
           {bestSellers?.map((el) => (
             <Product

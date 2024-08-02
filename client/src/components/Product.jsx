@@ -57,7 +57,7 @@ const Product = ({ productData, isNew }) => {
           </span>
         </div>
         <div className="flex flex-col gap-1 mt-[15px] items-start w-full">
-          <span className="flex ">
+          <span className="flex">
             {renderStarFromNumber(productData?.totalRatings)}
           </span>
           <span className="line-clamp-1">{productData?.title}</span>
