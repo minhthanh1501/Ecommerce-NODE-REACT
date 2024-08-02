@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sidebar, Banner, BestSeller, DealDaily } from "../../components";
 import { apiGetProducts } from "@/apis";
+import FeaturedProducts from "@/components/FeaturedProducts";
 
 const Home = () => {
   return (
@@ -15,6 +16,10 @@ const Home = () => {
           <BestSeller />
         </div>
       </div>
+      <div className="my-8">
+        <FeaturedProducts />
+      </div>
+      <div className="w-full h-[500px]"></div>
     </>
   );
 };
