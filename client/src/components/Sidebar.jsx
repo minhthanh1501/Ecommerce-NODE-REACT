@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { createSlug } from "@/utils/helpers";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { getCategories } from "@/store/app/asyncActions";
 
 const Sidebar = () => {
+  const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.app);
+
+  useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
 
   return (
     <div className="flex flex-col border">

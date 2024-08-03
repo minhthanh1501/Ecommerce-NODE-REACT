@@ -2,8 +2,9 @@ import { apiGetProducts } from "@/apis";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import Slider from "react-slick";
-import { Product } from ".";
+import { useDispatch, useSelector } from "react-redux";
+import { getNewProducts } from "@/store/product/asyncAction";
+import CustomSlider from "./CustomSlider";
 
 const tabs = [
   { id: 1, name: "best sellers" },
@@ -11,47 +12,34 @@ const tabs = [
   { id: 3, name: "tablet" },
 ];
 
-const settings = {
-  dots: false,
-  infinite: false,
-  speed: 500,
-  slidesToShow: 3,
-  slidesToScroll: 1,
-};
-
 const BestSeller = () => {
   // const { products } = useSelector((state) => state.product);
   // console.log(products);
   const [bestSellers, setBestSellers] = useState(null);
-  const [newProducts, setNewProducts] = useState(null);
   const [activedTab, setActivedTab] = useState(1);
   const [products, setProducts] = useState(null);
 
-  const fetchProducts = async () => {
-    const response = await Promise.all([
-      apiGetProducts({ sort: "-sold" }),
-      apiGetProducts({ sort: "-createdAt" }),
-    ]);
-    if (response[0].success) {
-      setBestSellers(response[0].products);
-      setProducts(response[0].products);
-    }
-    if (response[1].success) {
-      setNewProducts(response[1].products);
-      setProducts(response[1].products);
-    }
+  const dispatch = useDispatch();
+  const { newProducts } = useSelector((state) => state.products);
 
-    // console.log();
+  const fetchProducts = async () => {
+    const response = await apiGetProducts({ sort: "-sold" });
+    if (response?.success) {
+      setBestSellers(response.products);
+      setProducts(response.products);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
+    dispatch(getNewProducts());
   }, []);
+
   useEffect(() => {
     if (activedTab === 1) setProducts(bestSellers);
     if (activedTab === 2) setProducts(newProducts);
   }, [activedTab]);
-  // console.log(bestSellers)
+
   return (
     <div>
       <div className="flex text-[20px] pb-4 -ml-[32px]">
@@ -74,16 +62,7 @@ const BestSeller = () => {
         ))}
       </div>
       <div className="mt-2 border-main border-t-2 pt-4">
-        <Slider {...settings}>
-          {bestSellers?.map((el) => (
-            <Product
-              key={el._id}
-              pid={el._id}
-              productData={el}
-              isNew={activedTab === 1 ? false : true}
-            />
-          ))}
-        </Slider>
+        <CustomSlider products={products} activedTab={activedTab} />
       </div>
       <div className="w-full mt-4 gap-4 flex">
         <img

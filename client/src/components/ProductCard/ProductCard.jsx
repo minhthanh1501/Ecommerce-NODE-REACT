@@ -14,7 +14,11 @@ const ProductCard = ({ image, title, totalRatings, price }) => {
           <span className="line-clamp-1 text-sm capitalize">
             {title.toLowerCase()}
           </span>
-          <span className="flex">{renderStarFromNumber(totalRatings, 14)}</span>
+          <span className="flex">
+            {renderStarFromNumber(totalRatings, 14)?.map((el, index) => {
+              <span key={index}>{el}</span>;
+            })}
+          </span>
           <span>{formatMoney(price)} VND</span>
         </div>
       </div>

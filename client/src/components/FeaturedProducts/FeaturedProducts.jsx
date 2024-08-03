@@ -19,7 +19,7 @@ const FeaturedProducts = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
-  console.log(products);
+
   return (
     <div className="w-full">
       <h2 className="text-[20px] font-semibold py-[15px] border-b-2  border-main">
@@ -28,7 +28,7 @@ const FeaturedProducts = () => {
       <div className="flex flex-wrap mt-[15px]">
         {products?.map((el) => (
           <ProductCard
-            key={el.id}
+            key={el._id}
             image={el.thumb}
             title={el.title}
             totalRatings={el.totalRatings}
@@ -40,7 +40,7 @@ const FeaturedProducts = () => {
         <img
           src="https://digital-world-2.myshopify.com/cdn/shop/files/banner1-bottom-home2_b96bc752-67d4-45a5-ac32-49dc691b1958_600x.jpg?v=1613166661"
           alt=""
-          className="w-49%] "
+          className="w-[49%] "
         />
         <div className="flex flex-col justify-between w-[24%] gap-4">
           <img

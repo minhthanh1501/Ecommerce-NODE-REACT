@@ -108,53 +108,70 @@ const getProduct = asyncHandler(async (req, res) => {
 });
 
 const ratings = asyncHandler(async (req, res) => {
-  const { _id } = req.user
-  const { star, comment, pid } = req.body
-  if (!star || !pid) throw new Error('Missing Input')
-  
-  const ratingProduct = await Product.findById(pid)
-  const alreadyRating = ratingProduct?.ratings.find(el => el.postedBy.toString() === _id)
-//   console.log({alreadyRating})
-  console.log(alreadyRating)
+  const { _id } = req.user;
+  const { star, comment, pid } = req.body;
+  if (!star || !pid) throw new Error("Missing Input");
+
+  const ratingProduct = await Product.findById(pid);
+  const alreadyRating = ratingProduct?.ratings.find(
+    (el) => el.postedBy.toString() === _id
+  );
+  //   console.log({alreadyRating})
+  console.log(alreadyRating);
   if (alreadyRating) {
     // update star & comment
-    await Product.updateOne({
-        ratings: { $elemMatch: alreadyRating}
-    },{
-        $set: { "ratings.$.star" : star, "ratings.$.comment" : comment }
-    }, {new: true})
-  } else{
+    await Product.updateOne(
+      {
+        ratings: { $elemMatch: alreadyRating },
+      },
+      {
+        $set: { "ratings.$.star": star, "ratings.$.comment": comment },
+      },
+      { new: true }
+    );
+  } else {
     // add star & comment
-    await Product.findByIdAndUpdate(pid, {
-        $push: {ratings: {star,comment,postedBy: _id}}
-    }, {new : true})
+    await Product.findByIdAndUpdate(
+      pid,
+      {
+        $push: { ratings: { star, comment, postedBy: _id } },
+      },
+      { new: true }
+    );
   }
 
   // Sum ratings star
-  const updatedProduct = await Product.findById(pid)
-  const ratingsCount = updatedProduct.ratings.length
-  const sumRatings = updatedProduct.ratings.reduce((sum, el) => sum + el.star, 0)
-  updatedProduct.totalRatings = Math.round(sumRatings * 10 / ratingsCount) / 10
+  const updatedProduct = await Product.findById(pid);
+  const ratingsCount = updatedProduct.ratings.length;
+  const sumRatings = updatedProduct.ratings.reduce(
+    (sum, el) => sum + el.star,
+    0
+  );
+  updatedProduct.totalRatings =
+    Math.round((sumRatings * 10) / ratingsCount) / 10;
 
-  await updatedProduct.save()
+  await updatedProduct.save();
 
   return res.status(200).json({
     success: true,
     mes: "Ratings success!",
-    updatedProduct
-  })
-})
+    updatedProduct,
+  });
+});
 
-const uploadImagesProduct = asyncHandler(async (req,res) => {
-  const { pid } = req.params
-  if(!req.files) throw new Error('Missing Input')
-  const response = await Product.findByIdAndUpdate(pid, {$push: {image: {$each : req.files.map(el => el.path)}}}, {new : true})
+const uploadImagesProduct = asyncHandler(async (req, res) => {
+  const { pid } = req.params;
+  if (!req.files) throw new Error("Missing Input");
+  const response = await Product.findByIdAndUpdate(
+    pid,
+    { $push: { image: { $each: req.files.map((el) => el.path) } } },
+    { new: true }
+  );
   return res.status(200).json({
     success: response ? true : false,
-    updatedProduct: response ? response : "Cannot Upload Images Product"
-  })
-})
-
+    updatedProduct: response ? response : "Cannot Upload Images Product",
+  });
+});
 
 module.exports = {
   createProduct,
@@ -163,5 +180,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   ratings,
-  uploadImagesProduct
+  uploadImagesProduct,
 };

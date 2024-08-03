@@ -3,8 +3,8 @@ import appSlice from "./app/appSlice";
 import productSlice from "./product/productSlice";
 
 export const store = configureStore({
-    reducer:{
-        app: appSlice,
-        product: productSlice
-    }
-})
+  reducer: {
+    app: appSlice,
+    products: productSlice,
+  },
+});

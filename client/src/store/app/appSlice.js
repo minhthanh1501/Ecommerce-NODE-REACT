@@ -1,16 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
-import * as actions from './asyncActions'
+import * as actions from "./asyncActions";
 
 export const appSlice = createSlice({
   name: "app",
   initialState: {
     categories: null,
-    isLoading: false
+    isLoading: false,
   },
   reducers: {
     logout: (state) => {
       state.isLoading = false;
-    }
+    },
   },
   // Code logic xử lý async action
   extraReducers: (builder) => {
@@ -39,4 +39,4 @@ export const appSlice = createSlice({
 
 // export const {  } = appSlice.actions
 
-export default appSlice.reducer
+export default appSlice.reducer;

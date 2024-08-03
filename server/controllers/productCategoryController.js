@@ -11,7 +11,7 @@ const createCategory = asyncHandler(async (req, res) => {
 });
 
 const getCategory = asyncHandler(async (req, res) => {
-  const response = await ProductCategory.find().select("title _id");
+  const response = await ProductCategory.find();
 
   return res.json({
     success: response ? true : false,
@@ -21,11 +21,9 @@ const getCategory = asyncHandler(async (req, res) => {
 
 const updateCategory = asyncHandler(async (req, res) => {
   const { pcid } = req.params;
-  const response = await ProductCategory.findByIdAndUpdate(
-    pcid,
-    req.body,
-    { new: true }
-  );
+  const response = await ProductCategory.findByIdAndUpdate(pcid, req.body, {
+    new: true,
+  });
 
   return res.json({
     success: response ? true : false,
@@ -33,15 +31,19 @@ const updateCategory = asyncHandler(async (req, res) => {
   });
 });
 
-
 const deleteCategory = asyncHandler(async (req, res) => {
-    const { pcid } = req.params;
-    const response = await ProductCategory.findByIdAndDelete(pcid)
-  
-    return res.json({
-      success: response ? true : false,
-      createCategory: response ? response : "Cannot delete product-category",
-    });
-  });
+  const { pcid } = req.params;
+  const response = await ProductCategory.findByIdAndDelete(pcid);
 
-module.exports = { createCategory,deleteCategory,updateCategory,getCategory };
+  return res.json({
+    success: response ? true : false,
+    createCategory: response ? response : "Cannot delete product-category",
+  });
+});
+
+module.exports = {
+  createCategory,
+  deleteCategory,
+  updateCategory,
+  getCategory,
+};
