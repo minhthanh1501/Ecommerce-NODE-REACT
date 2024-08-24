@@ -6,13 +6,16 @@ import { twMerge } from "tailwind-merge";
 import clsx from "clsx";
 import { SelectOption } from ".";
 import icons from "@/utils/icons";
+import { Link } from "react-router-dom";
+import path from "@/utils/path";
 
 const Product = ({ productData, isNew }) => {
   const [isShowOption, setIsShowOption] = useState(false);
   const { AiFillEye, AiOutlineMenu, BsFillSuitHeartFill } = icons;
   return (
     <div className="w-full text-base px-[10px]">
-      <div
+      <Link
+        to={`/${path.DETAIL_PRODUCT}/${productData?._id}/${productData?.title}`}
         className="w-full border p-[15px] flex flex-col items-center"
         onMouseEnter={(e) => {
           e.stopPropagation();
@@ -67,7 +70,7 @@ const Product = ({ productData, isNew }) => {
           <span className="line-clamp-1">{productData?.title}</span>
           <span>{formatMoney(productData?.price)} VND</span>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };
