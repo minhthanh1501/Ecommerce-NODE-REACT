@@ -1,19 +1,60 @@
+import { apiLogin, apiRegister } from "@/apis/user";
 import Button from "@/components/commons/Button";
 import InputField from "@/components/commons/InputField";
+import path from "@/utils/path";
 import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { register } from "@/store/user/userSlice";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
   const [isRegister, setIsRegister] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [payload, setPayload] = useState({
     email: "",
     password: "",
-    name: "",
+    firstname: "",
+    lastname: "",
+    mobile: "",
   });
 
-  const handleSubmit = useCallback(() => {
-    console.log(payload);
-  }, [payload]);
+  const resetPayload = () => {
+    setPayload({
+      email: "",
+      password: "",
+      firstname: "",
+      lastname: "",
+      mobile: "",
+    });
+  };
+
+  const handleSubmit = useCallback(async () => {
+    const { firstname, lastname, ...data } = payload;
+    if (isRegister) {
+      const response = await apiRegister(payload);
+      if (response.success) {
+        Swal.fire("Congratulation", response.mes, "success").then(() => {
+          setIsRegister(false);
+          resetPayload();
+        });
+      } else Swal.fire("Oop!", response.mes, "error");
+    } else {
+      const response = await apiLogin(data);
+      if (response.success) {
+        dispatch(
+          register({
+            isLoggedIn: true,
+            token: response.accessToken,
+            userData: response.userData,
+          })
+        );
+        navigate(`/${path.HOME}`);
+      } else Swal.fire("Oop!", response.mes, "error");
+    }
+  }, [payload, isRegister]);
 
   return (
     <div className="w-screen h-screen relative">
@@ -28,11 +69,23 @@ const Login = () => {
             {isRegister ? "Register" : "Login"}
           </h1>
           {isRegister && (
-            <InputField
-              value={payload.name}
-              setValue={setPayload}
-              nameKey="name"
-            />
+            <div className="flex items-center gap-2">
+              <InputField
+                value={payload.firstname}
+                setValue={setPayload}
+                nameKey="firstname"
+              />
+              <InputField
+                value={payload.lastname}
+                setValue={setPayload}
+                nameKey="lastname"
+              />
+              <InputField
+                value={payload.mobile}
+                setValue={setPayload}
+                nameKey="mobile"
+              />
+            </div>
           )}
           <InputField
             value={payload.email}

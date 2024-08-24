@@ -34,7 +34,7 @@ var userSchema = new mongoose.Schema(
       {
         product: {
           type: mongoose.Types.ObjectId,
-          ref: 'Product',
+          ref: "Product",
         },
         quantity: Number,
         color: String,
@@ -42,7 +42,7 @@ var userSchema = new mongoose.Schema(
     ],
     address: {
       type: String,
-      default: '',
+      default: "",
     },
     wishList: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
     isBlocked: {

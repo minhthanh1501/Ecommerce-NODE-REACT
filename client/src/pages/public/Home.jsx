@@ -8,7 +8,8 @@ import icons from "@/utils/icons";
 const Home = () => {
   const { newProducts } = useSelector((state) => state.products);
   const { categories } = useSelector((state) => state.app);
-
+  const { isLoggedIn, current } = useSelector((state) => state.user);
+  console.log({ isLoggedIn, current });
   const { IoIosArrowForward } = icons;
 
   return (
