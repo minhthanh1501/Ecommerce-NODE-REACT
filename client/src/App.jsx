@@ -8,6 +8,7 @@ import {
   DetailProduct,
   FAQ,
   Products,
+  FinalRegister,
 } from "./pages/public";
 import path from "./utils/path";
 
@@ -26,6 +27,7 @@ function App() {
           <Route path={path.FAQ} element={<FAQ />} />
           <Route path={path.PRODUCTS} element={<Products />} />
         </Route>
+        <Route path={path.FINAL_REGISTER} element={<FinalRegister />} />
         <Route path={path.LOGIN} element={<Login />} />
       </Routes>
     </div>

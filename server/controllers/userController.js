@@ -7,12 +7,38 @@ const {
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
 const crypto = require("crypto");
-const { now } = require("mongoose");
+const makeToken = require("uniqid");
+
+// const register = asyncHandler(async (req, res) => {
+//   const { email, password, firstname, lastname } = req.body;
+
+//   if (!email || !password || !firstname || !lastname) {
+//     return res.status(400).json({
+//       success: false,
+//       mes: "Missing Input!",
+//     });
+//   }
+
+//   const user = await User.findOne({ email: email });
+
+//   if (user) {
+//     throw new Error(`Email has already existed!`);
+//   } else {
+//     const NewUser = await User.create(req.body);
+
+//     return res.status(200).json({
+//       success: NewUser ? true : false,
+//       mes: NewUser
+//         ? "Register is Successfully! Please login!"
+//         : "Something went Wrong!",
+//     });
+//   }
+// });
 
 const register = asyncHandler(async (req, res) => {
-  const { email, password, firstname, lastname } = req.body;
+  const { email, password, firstname, lastname, mobile } = req.body;
 
-  if (!email || !password || !firstname || !lastname) {
+  if (!email || !password || !firstname || !lastname || !mobile) {
     return res.status(400).json({
       success: false,
       mes: "Missing Input!",
@@ -20,18 +46,57 @@ const register = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email: email });
-
   if (user) {
     throw new Error(`Email has already existed!`);
   } else {
-    const NewUser = await User.create(req.body);
+    const token = makeToken();
+    // lưu cookie
+    res.cookie(
+      "dataRegister",
+      { ...req.body, token },
+      {
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000,
+      }
+    );
 
-    return res.status(200).json({
-      success: NewUser ? true : false,
-      mes: NewUser
-        ? "Register is Successfully! Please login!"
-        : "Something went Wrong!",
+    const html = `Please Click Link bottom to complete process register. Link will expired then 15 minutes since now! 
+  <a href = ${process.env.URL_SERVER}/api/user/finalregister/${token} >Click here!</a>`;
+
+    const data = {
+      email,
+      html,
+      subject: "Complete process register!",
+    };
+
+    await sendMail(data);
+    return res.json({
+      succes: true,
+      mes: "Please check your email to active account",
     });
+  }
+});
+
+const finalRegister = asyncHandler(async (req, res) => {
+  const cookie = req.cookies;
+  console.log(cookie);
+
+  const { token } = req.params;
+  if (!cookie || cookie?.dataRegister?.token !== token)
+    return res.redirect(`${process.env.URL_CLIENT}/finalregister/failed`);
+
+  const NewUser = await User.create({
+    email: cookie?.dataRegister?.email,
+    password: cookie?.dataRegister?.password,
+    mobile: cookie?.dataRegister?.mobile,
+    firstname: cookie?.dataRegister?.firstname,
+    lastname: cookie?.dataRegister?.lastname,
+  });
+
+  if (NewUser) {
+    return res.redirect(`${process.env.URL_CLIENT}/finalregister/success`);
+  } else {
+    return res.redirect(`${process.env.URL_CLIENT}/finalregister/failed`);
   }
 });
 
@@ -153,6 +218,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const data = {
     email,
     html,
+    subject: "Forgot password",
   };
 
   const rs = await sendMail(data);
@@ -316,4 +382,5 @@ module.exports = {
   updatedUserByAdmin,
   updatedUserAddress,
   updateCart,
+  finalRegister,
 };
