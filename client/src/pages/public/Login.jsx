@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { register } from "@/store/user/userSlice";
 import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [isShowModalForgotPassword, setIsShowModalForgotPassword] =
@@ -36,8 +37,11 @@ const Login = () => {
 
   const handleForgotPassword = async () => {
     const response = await apiForgotPassword({ email });
-
-    console.log(response);
+    if (response.success) {
+      toast.success(response.mes);
+    } else {
+      toast(response.mes);
+    }
   };
 
   const handleSubmit = useCallback(async () => {
@@ -67,22 +71,28 @@ const Login = () => {
 
   return (
     <div className="w-screen h-screen relative">
-      <div className="absolute top-0 left-0 right-0 bottom-0 z-10 bg-overlay flex flex-col items-center py-8">
-        <div className="flex flex-col gap-4 bg-gray-600 p-4 rounded">
-          <label htmlFor="email">Enter your email:</label>
-          <input
-            type="text"
-            id="email"
-            className="w-[800px] p-2 border-b outline-none rounded placeholder:text-sm"
-            placeholder="Exp: email@gmail.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <div className="flex items-center justify-end mt-4">
-            <Button name={"Submit"} handleOnClick={handleForgotPassword} />
+      {isShowModalForgotPassword && (
+        <div className="absolute top-0 left-0 right-0 bottom-0 z-10 bg-overlay flex flex-col items-center py-8 animate-slide-right">
+          <div className="flex flex-col gap-4 bg-gray-600 p-4 rounded">
+            <label htmlFor="email">Enter your email:</label>
+            <input
+              type="text"
+              id="email"
+              className="w-[800px] p-2 border-b outline-none rounded placeholder:text-sm"
+              placeholder="Exp: email@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <div className="flex items-center gap-2 justify-end mt-4">
+              <Button name={"Submit"} handleOnClick={handleForgotPassword} />
+              <Button
+                name={"Back"}
+                handleOnClick={() => setIsShowModalForgotPassword(false)}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
       <img
         src="https://www.ssi-schaefer.com/resource/blob/1444662/b5bdadcababc0904a574ea9d675870c3/e-commerce-hero-dam-image-en-31561--data.jpg"
         alt=""
@@ -130,7 +140,10 @@ const Login = () => {
           />
           <div className="flex items-center justify-between my-2 w-full text-sm">
             {!isRegister && (
-              <span className="text-blue-500 hover:underline cursor-pointer">
+              <span
+                className="text-blue-500 hover:underline cursor-pointer"
+                onClick={() => setIsShowModalForgotPassword(true)}
+              >
                 Forgot your account?
               </span>
             )}

@@ -11,3 +11,7 @@ export const apiLogin = (data) => {
 export const apiForgotPassword = (data) => {
   return axios.post("/user/forgotpassword", data);
 };
+
+export const apiResetPassword = (data) => {
+  return axios.put("/user/resetpassword", data);
+};
