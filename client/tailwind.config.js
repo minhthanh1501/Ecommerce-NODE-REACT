@@ -12,6 +12,7 @@ export default {
       backgroundColor: {},
       colors: {
         main: "red",
+        overlay: "rgba(0,0,0,0.3)",
       },
       flex: {
         2: "2 2 0%",

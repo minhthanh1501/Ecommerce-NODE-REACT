@@ -71,7 +71,7 @@ const register = asyncHandler(async (req, res) => {
 
     await sendMail(data);
     return res.json({
-      succes: true,
+      success: true,
       mes: "Please check your email to active account",
     });
   }
@@ -82,8 +82,10 @@ const finalRegister = asyncHandler(async (req, res) => {
   console.log(cookie);
 
   const { token } = req.params;
-  if (!cookie || cookie?.dataRegister?.token !== token)
+  if (!cookie || cookie?.dataRegister?.token !== token) {
+    res.clearCookie("dataRegister");
     return res.redirect(`${process.env.URL_CLIENT}/finalregister/failed`);
+  }
 
   const NewUser = await User.create({
     email: cookie?.dataRegister?.email,
@@ -92,7 +94,7 @@ const finalRegister = asyncHandler(async (req, res) => {
     firstname: cookie?.dataRegister?.firstname,
     lastname: cookie?.dataRegister?.lastname,
   });
-
+  res.clearCookie("dataRegister");
   if (NewUser) {
     return res.redirect(`${process.env.URL_CLIENT}/finalregister/success`);
   } else {
@@ -203,7 +205,7 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 const forgotPassword = asyncHandler(async (req, res) => {
-  const { email } = req.query;
+  const { email } = req.body;
   if (!email) throw new Error("Missing Email!");
 
   const user = await User.findOne({ email });
@@ -213,7 +215,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   // save để cập nhật lưu trong db
   await user.save();
 
-  const html = `Please Click Link bottom to change your password. Link will expired then 15 minutes since now! <a href = ${process.env.URL_CLIENT}/api/user/reset-password/${resetToken} >Click here!</a>`;
+  const html = `Please Click Link bottom to change your password. Link will expired then 15 minutes since now! <a href = ${process.env.URL_CLIENT}/reset-password/${resetToken} >Click here!</a>`;
 
   const data = {
     email,
