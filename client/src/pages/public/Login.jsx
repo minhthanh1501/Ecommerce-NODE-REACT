@@ -2,17 +2,19 @@ import { apiForgotPassword, apiLogin, apiRegister } from "@/apis/user";
 import Button from "@/components/commons/Button";
 import InputField from "@/components/commons/InputField";
 import path from "@/utils/path";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { register } from "@/store/user/userSlice";
+import { login } from "@/store/user/userSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { validate } from "@/utils/helpers";
 
 const Login = () => {
   const [isShowModalForgotPassword, setIsShowModalForgotPassword] =
     useState(false);
   const [isRegister, setIsRegister] = useState(false);
+  const [invalidFields, setInValidFields] = useState([]);
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,30 +46,42 @@ const Login = () => {
     }
   };
 
+  // handlesubmit
   const handleSubmit = useCallback(async () => {
     const { firstname, lastname, ...data } = payload;
-    if (isRegister) {
-      const response = await apiRegister(payload);
-      if (response.success) {
-        Swal.fire("Congratulation", response.mes, "success").then(() => {
-          setIsRegister(false);
-          resetPayload();
-        });
-      } else Swal.fire("Oop!", response.mes, "error");
-    } else {
-      const response = await apiLogin(data);
-      if (response.success) {
-        dispatch(
-          register({
-            isLoggedIn: true,
-            token: response.accessToken,
-            userData: response.userData,
-          })
-        );
-        navigate(`/${path.HOME}`);
-      } else Swal.fire("Oop!", response.mes, "error");
+
+    const invalids = isRegister
+      ? validate(payload, setInValidFields)
+      : validate(data, setInValidFields);
+
+    if (invalids === 0) {
+      if (isRegister) {
+        const response = await apiRegister(payload);
+        if (response.success) {
+          Swal.fire("Congratulation", response.mes, "success").then(() => {
+            setIsRegister(false);
+            resetPayload();
+          });
+        } else Swal.fire("Oop!", response.mes, "error");
+      } else {
+        const response = await apiLogin(data);
+        if (response.success) {
+          dispatch(
+            login({
+              isLoggedIn: true,
+              token: response.accessToken,
+              userData: response.userData,
+            })
+          );
+          navigate(`/${path.HOME}`);
+        } else Swal.fire("Oop!", response.mes, "error");
+      }
     }
   }, [payload, isRegister]);
+
+  useEffect(() => {
+    resetPayload();
+  }, [isRegister]);
 
   return (
     <div className="w-screen h-screen relative">
@@ -109,16 +123,22 @@ const Login = () => {
                 value={payload.firstname}
                 setValue={setPayload}
                 nameKey="firstname"
+                invalidFields={invalidFields}
+                setInValidFields={setInValidFields}
               />
               <InputField
                 value={payload.lastname}
                 setValue={setPayload}
                 nameKey="lastname"
+                invalidFields={invalidFields}
+                setInValidFields={setInValidFields}
               />
               <InputField
                 value={payload.mobile}
                 setValue={setPayload}
                 nameKey="mobile"
+                invalidFields={invalidFields}
+                setInValidFields={setInValidFields}
               />
             </div>
           )}
@@ -126,12 +146,16 @@ const Login = () => {
             value={payload.email}
             setValue={setPayload}
             nameKey="email"
+            invalidFields={invalidFields}
+            setInValidFields={setInValidFields}
           />
           <InputField
             value={payload.password}
             setValue={setPayload}
             nameKey="password"
             type={"password"}
+            invalidFields={invalidFields}
+            setInValidFields={setInValidFields}
           />
           <Button
             name={isRegister ? "Register" : "Login"}

@@ -54,9 +54,9 @@ const Home = () => {
                     <h4 className="font-semibold uppercase">{item.title}</h4>
                     <ul className="text-sm">
                       {item.brand?.map((el) => (
-                        <span className="flex gap-2 text-gray-500">
+                        <span key={el} className="flex gap-2 text-gray-500">
                           <IoIosArrowForward size={14} />
-                          <li key={el}>{el}</li>
+                          <li>{el}</li>
                         </span>
                       ))}
                     </ul>
